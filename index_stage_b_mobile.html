@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Stage B Study Hub</title>
+<style>
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#f5f7fb;color:#172033}
+header{position:sticky;top:0;background:#1f4e78;color:white;padding:14px;z-index:2} h1{margin:0;font-size:20px}
+main{max-width:900px;margin:auto;padding:12px} select,button,a{font:inherit} select{padding:8px;border-radius:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+.card{background:white;border:1px solid #e5e7eb;border-radius:14px;padding:13px} .date{font-weight:800} .topic{font-weight:700;margin:4px 0 10px;line-height:1.4}
+.actions{display:flex;gap:7px;flex-wrap:wrap} button,a{border-radius:10px;padding:9px 11px;text-decoration:none;border:0;font-weight:700}
+.primary{background:#1f4e78;color:white} .secondary{background:white;color:#1f4e78;border:1px solid #bfd0e2}
+.status{font-size:12px;color:#667085;margin-top:8px} .tabs{display:flex;gap:8px;margin:10px 0} .tabs button{flex:1}
+#review{display:none} .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#111827;color:white;padding:9px 12px;border-radius:9px;display:none}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.actions>*{flex:1;min-width:44%}}
+</style></head>
+<body>
+<header><h1>Stage B Study Hub</h1><div style="font-size:12px;opacity:.9">לוח ימים · Drive משותף · בחינה עם ChatGPT</div></header>
+<main>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+<select id="student"><option value="janet">ז׳אנט</option><option value="elisheva">אלישבע</option></select>
+<a class="secondary" target="_blank" href="https://drive.google.com/drive/folders/1PWBc3KIHwAelgAzqpQG7W1eQ3SPHcAoT">Drive ראשי</a>
+</div>
+<div class="tabs"><button class="primary" onclick="show('days')">לוח ימים</button><button class="secondary" onclick="show('review')">מה לחזור</button></div>
+<div id="days" class="grid"></div><div id="review" class="grid"></div>
+</main><div id="toast" class="toast"></div>
+<script>
+const T=[[1, "03.10", "סומטיזציה, מחלה כרונית ו-Liaison", "https://drive.google.com/drive/folders/1o2X4bP0jUdi1rhC_2_jDE0OjhMK6Wyf0"], [2, "04.10", "אובדנות", "https://drive.google.com/drive/folders/1dJ-QKN9QVy7m0d9YcUcWsolbMOKoCaMu"], [3, "05.10", "טראומה, ASD ו-PTSD", "https://drive.google.com/drive/folders/1K2IlqbrtajiHuJ4SD9MzI5wuxRgnnSP2"], [4, "06.10", "פסיכוזה וסכיזופרניה מוקדמת", "https://drive.google.com/drive/folders/1km1ai61Sui7H0G5u_mdEM7GWWZ0LMQQN"], [5, "07.10", "אנטיפסיכוטיים, EPS, NMS ותופעות מטבוליות", "https://drive.google.com/drive/folders/1LeiZ-1Jktu9UdVZABBYMUgjD9XESw78l"], [6, "08.10", "דיכאון, antidepressants ו-ECT", "https://drive.google.com/drive/folders/1tyGenyCJv6SvzWegDvkzM4nWR4MNaKT5"], [7, "09.10", "Bipolar ומייצבי מצב רוח", "https://drive.google.com/drive/folders/1ZXefWnLumGmscHv8Qq9Mx172JiDFr3Jf"], [8, "10.10", "חרדה ו-OCD", "https://drive.google.com/drive/folders/1m1IoaUs2a43w-nMFV3CA3ZdcD-fal2nI"], [9, "11.10", "ADHD", "https://drive.google.com/drive/folders/1BfNN7sO6fplogULMKSC_9XkLjpP4IaHP"], [10, "12.10", "ODD, Conduct, אלימות ותוקפנות", "https://drive.google.com/drive/folders/1vEJIx_ItnfJNup4WqgsBvwe0sDKcqdoe"], [11, "13.10", "טיקים ו-Tourette", "https://drive.google.com/drive/folders/15DOcYCewirEDlTCtXScUra9Vp6OiNv1m"], [12, "14.10", "ASD ו-Intellectual Disability", "https://drive.google.com/drive/folders/1VeL12toKngwE0axe8vTcqpNLZ0g1exPF"], [13, "15.10", "התפתחות נורמטיבית וגיל הרך", "https://drive.google.com/drive/folders/1AbAvFBw72CNvfXtJxtCbjs1Sslf_Lzk4"], [14, "16.10", "גנטיקה ונוירוביולוגיה התפתחותית", "https://drive.google.com/drive/folders/18elUoSQVjspTnEeIcBXtzefaE7ONJcfA"], [15, "17.10", "בדיקה נוירולוגית, localization והדמיה", "https://drive.google.com/drive/folders/11g9omoPMU5_gq3ymGkkbDm9NiCwSZ6by"], [16, "18.10", "Altered consciousness, delirium, syncope, TBI ו-CNS infection", "https://drive.google.com/drive/folders/1_EzV8l4JAuW01z5ERZhz6JXWXOKUdnIY"], [17, "19.10", "אפילפסיה, הפרעות תנועה ותסמונות נוירוגנטיות", "https://drive.google.com/drive/folders/1TpJ1IfyYHaQNczbtH35Os0J9J-8QgFP7"], [18, "20.10", "הפרעות שינה", "https://drive.google.com/drive/folders/1wWjmUXGmy5vf-olC8UqULcd7ruEOwSCU"], [19, "20.10", "דימוי גוף - Body Dysmorphic Disorder", "https://drive.google.com/drive/folders/1YgyqRzy-svJnHKGn3W85I4lj7nRxpFfU"], [20, "21.10", "שפה, לקויות למידה ודיסלקסיה", "https://drive.google.com/drive/folders/1V7jRnA1Go-GxgyL041sVpJWdcEhdM7Hk"], [21, "22.10", "התעללות, הזנחה ופגיעה מינית", "https://drive.google.com/drive/folders/18Y53qsMx6Xurb3fuSUHfzAHbLzScnv8s"], [22, "23.10", "פסיכיאטריה משפטית, אימוץ וגירושין", "https://drive.google.com/drive/folders/1Z0HufBM41s43txOAJII7yCBTCrbVQ8vD"], [23, "24.10", "פסיכופרמקולוגיה כללית, בנזודיאזפינים ומתודולוגיה", "https://drive.google.com/drive/folders/179st3jBqdqa6v8zHr36Ut6QDylvzS3ov"], [24, "25.10", "הריון, לידה, הנקה והמעבר להורות", "https://drive.google.com/drive/folders/1fnyZLiXHEMnFdy4OX8EvcPQyqsksnRKO"], [25, "25.10", "תיאוריות התפתחותיות מוקדמות", "https://drive.google.com/drive/folders/1rd6BMRXQdXXsHdBgw_D4dPpHOHPK2KDE"], [26, "26.10", "סמים והתמכרויות", "https://drive.google.com/drive/folders/14yar7heblTIPFBXhbx97o7VA2k5gcssx"], [27, "26.10", "הפרעות אכילה", "https://drive.google.com/drive/folders/1XkEoZgiWeGe0vNVkxqpi4IiP7FuJvztj"]];
+let student=localStorage.getItem("stageb_student")||"janet"; document.getElementById("student").value=student;
+function key(id){return "stageb_"+student+"_"+id} function st(id){return localStorage.getItem(key(id))||"לא התחיל"}
+function setS(id,s){localStorage.setItem(key(id),s);render()}
+function p(t){const who=student==="janet"?"ז׳אנט":"אלישבע";return who+" | "+t[2]+" | מצב בחינה\n\nהשתמש בהוראות הפרויקט, בסילבוס וב-Master Index כמקור השאלות, ובקבצי Lewis/Dulcan/Kaplan שבתיקיית Drive הזו כמקור הידע:\n"+t[3]+"\n\nשאל שאלה אחת בכל פעם. אל תיתן רמז או תשובת מודל לפני הניסיון. הפרד בין ידע עצמאי, אחרי רמז ואחרי לימוד. ידע שהוחזר מיד אחרי לימוד אינו נחשב ידע עצמאי. כסה את כל משפחות שאלות הסילבוס בנושא וגם וריאציה חדשה אחת. התחל בשאלה הראשונה בלבד."}
+async function exam(t){const x=p(t);try{await navigator.clipboard.writeText(x);toast("הפרומפט הועתק — הדביקי ב-ChatGPT")}catch(e){prompt("העתיקי את הפרומפט:",x)}window.open("https://chatgpt.com/","_blank")}
+function toast(x){let e=document.getElementById("toast");e.textContent=x;e.style.display="block";setTimeout(()=>e.style.display="none",1800)}
+function card(t){return `<div class="card"><div class="date">${t[1]}</div><div class="topic">${String(t[0]).padStart(2,"0")} · ${t[2]}</div><div class="actions"><a class="secondary" target="_blank" href="${t[3]}">📁 חומרים</a><button class="primary" onclick="exam(T[${t[0]-1}])">🧠 בחינה</button></div><div class="actions" style="margin-top:7px"><button class="secondary" onclick="setS(${t[0]},'עצמאי')">עצמאי</button><button class="secondary" onclick="setS(${t[0]},'רמז')">רמז</button><button class="secondary" onclick="setS(${t[0]},'אחרי לימוד')">אחרי לימוד</button><button class="secondary" onclick="setS(${t[0]},'לחזרה')">לחזרה</button></div><div class="status">סטטוס: ${st(t[0])}</div></div>`}
+function render(){document.getElementById("days").innerHTML=T.map(card).join("");let r=T.filter(t=>["רמז","אחרי לימוד","לחזרה"].includes(st(t[0])));document.getElementById("review").innerHTML=r.length?r.map(card).join(""):'<div class="card">אין כרגע נושאים לחזרה.</div>'}
+function show(x){document.getElementById("days").style.display=x==="days"?"grid":"none";document.getElementById("review").style.display=x==="review"?"grid":"none"}
+document.getElementById("student").onchange=e=>{student=e.target.value;localStorage.setItem("stageb_student",student);render()};render();
+</script></body></html>
