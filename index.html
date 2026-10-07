@@ -17,7 +17,8 @@ main{max-width:900px;margin:auto;padding:12px} select,button,a{font:inherit} sel
 .panel{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:13px;margin-bottom:10px}
 textarea,input[type=text]{width:100%;font:inherit;border:1px solid #d8dee8;border-radius:10px;padding:10px;box-sizing:border-box}
 textarea{min-height:160px;line-height:1.45}.session{border-right:4px solid #1f4e78;padding-right:10px;margin:10px 0}.ok{color:#166534}.warn{color:#9a6700}.bad{color:#991b1b}
-@media(max-width:600px){.grid{grid-template-columns:1fr}.actions>*{flex:1;min-width:44%}.profiles{width:100%}.profiles button{flex:1}}
+.modalBack{display:none;position:fixed;inset:0;background:#0007;z-index:100;padding:18px;align-items:center;justify-content:center}.modalBack.show{display:flex}.modal{background:white;border-radius:16px;padding:16px;max-width:620px;width:100%;max-height:88vh;overflow:auto}.modal h3{margin:0 0 8px}.step{background:#f7f9fc;border:1px solid #e5e7eb;border-radius:12px;padding:10px;margin:9px 0}.modal textarea{min-height:180px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.actions>*{flex:1;min-width:44%}.profiles{width:100%}.profiles button{flex:1}.modalBack{padding:10px}.modal{max-height:92vh}}
 </style></head>
 <body>
 <header><h1>Stage B Study Hub</h1><div style="font-size:12px;opacity:.9">לוח ימים · Drive משותף · בחינה עם ChatGPT</div></header>
@@ -56,6 +57,15 @@ textarea{min-height:160px;line-height:1.45}.session{border-right:4px solid #1f4e
   </div>
 </section>
 </main><div id="toast" class="toast"></div>
+<div id="launchModal" class="modalBack">
+  <div class="modal">
+    <h3 id="launchTitle">פתיחת סשן</h3>
+    <div class="status" id="launchNote"></div>
+    <div class="step"><b>1. העתיקי את הפרומפט</b><textarea id="launchPrompt" readonly></textarea><div class="actions" style="margin-top:8px"><button class="primary" onclick="copyLaunchPrompt()">העתק פרומפט</button></div></div>
+    <div class="step"><b>2. פתחי את הפרויקט המשותף</b><div class="status" style="margin:5px 0 8px">ייפתח הפרויקט עצמו. שם פתחי צ׳אט חדש והדביקי את הפרומפט.</div><div class="actions"><a id="openProjectBtn" class="primary" href="#" target="_blank" rel="noopener">פתחי את פרויקט אלישבע וז׳אנט</a></div></div>
+    <div class="actions" style="margin-top:10px"><button class="secondary" onclick="closeLaunchModal()">סגור</button><button class="secondary" onclick="show('settings');closeLaunchModal()">שני קישור פרויקט</button></div>
+  </div>
+</div>
 <script>
 let PROJECT_URL=localStorage.getItem("stageb_project_url")||"";
 const T=[[1, "03.10", "סומטיזציה, מחלה כרונית ו-Liaison", "https://drive.google.com/drive/folders/1o2X4bP0jUdi1rhC_2_jDE0OjhMK6Wyf0"], [2, "04.10", "אובדנות", "https://drive.google.com/drive/folders/1dJ-QKN9QVy7m0d9YcUcWsolbMOKoCaMu"], [3, "05.10", "טראומה, ASD ו-PTSD", "https://drive.google.com/drive/folders/1K2IlqbrtajiHuJ4SD9MzI5wuxRgnnSP2"], [4, "06.10", "פסיכוזה וסכיזופרניה מוקדמת", "https://drive.google.com/drive/folders/1km1ai61Sui7H0G5u_mdEM7GWWZ0LMQQN"], [5, "07.10", "אנטיפסיכוטיים, EPS, NMS ותופעות מטבוליות", "https://drive.google.com/drive/folders/1LeiZ-1Jktu9UdVZABBYMUgjD9XESw78l"], [6, "08.10", "דיכאון, antidepressants ו-ECT", "https://drive.google.com/drive/folders/1tyGenyCJv6SvzWegDvkzM4nWR4MNaKT5"], [7, "09.10", "Bipolar ומייצבי מצב רוח", "https://drive.google.com/drive/folders/1ZXefWnLumGmscHv8Qq9Mx172JiDFr3Jf"], [8, "10.10", "חרדה ו-OCD", "https://drive.google.com/drive/folders/1m1IoaUs2a43w-nMFV3CA3ZdcD-fal2nI"], [9, "11.10", "ADHD", "https://drive.google.com/drive/folders/1BfNN7sO6fplogULMKSC_9XkLjpP4IaHP"], [10, "12.10", "ODD, Conduct, אלימות ותוקפנות", "https://drive.google.com/drive/folders/1vEJIx_ItnfJNup4WqgsBvwe0sDKcqdoe"], [11, "13.10", "טיקים ו-Tourette", "https://drive.google.com/drive/folders/15DOcYCewirEDlTCtXScUra9Vp6OiNv1m"], [12, "14.10", "ASD ו-Intellectual Disability", "https://drive.google.com/drive/folders/1VeL12toKngwE0axe8vTcqpNLZ0g1exPF"], [13, "15.10", "התפתחות נורמטיבית וגיל הרך", "https://drive.google.com/drive/folders/1AbAvFBw72CNvfXtJxtCbjs1Sslf_Lzk4"], [14, "16.10", "גנטיקה ונוירוביולוגיה התפתחותית", "https://drive.google.com/drive/folders/18elUoSQVjspTnEeIcBXtzefaE7ONJcfA"], [15, "17.10", "בדיקה נוירולוגית, localization והדמיה", "https://drive.google.com/drive/folders/11g9omoPMU5_gq3ymGkkbDm9NiCwSZ6by"], [16, "18.10", "Altered consciousness, delirium, syncope, TBI ו-CNS infection", "https://drive.google.com/drive/folders/1_EzV8l4JAuW01z5ERZhz6JXWXOKUdnIY"], [17, "19.10", "אפילפסיה, הפרעות תנועה ותסמונות נוירוגנטיות", "https://drive.google.com/drive/folders/1TpJ1IfyYHaQNczbtH35Os0J9J-8QgFP7"], [18, "20.10", "הפרעות שינה", "https://drive.google.com/drive/folders/1wWjmUXGmy5vf-olC8UqULcd7ruEOwSCU"], [19, "20.10", "דימוי גוף - Body Dysmorphic Disorder", "https://drive.google.com/drive/folders/1YgyqRzy-svJnHKGn3W85I4lj7nRxpFfU"], [20, "21.10", "שפה, לקויות למידה ודיסלקסיה", "https://drive.google.com/drive/folders/1V7jRnA1Go-GxgyL041sVpJWdcEhdM7Hk"], [21, "22.10", "התעללות, הזנחה ופגיעה מינית", "https://drive.google.com/drive/folders/18Y53qsMx6Xurb3fuSUHfzAHbLzScnv8s"], [22, "23.10", "פסיכיאטריה משפטית, אימוץ וגירושין", "https://drive.google.com/drive/folders/1Z0HufBM41s43txOAJII7yCBTCrbVQ8vD"], [23, "24.10", "פסיכופרמקולוגיה כללית, בנזודיאזפינים ומתודולוגיה", "https://drive.google.com/drive/folders/179st3jBqdqa6v8zHr36Ut6QDylvzS3ov"], [24, "25.10", "הריון, לידה, הנקה והמעבר להורות", "https://drive.google.com/drive/folders/1fnyZLiXHEMnFdy4OX8EvcPQyqsksnRKO"], [25, "25.10", "תיאוריות התפתחותיות מוקדמות", "https://drive.google.com/drive/folders/1rd6BMRXQdXXsHdBgw_D4dPpHOHPK2KDE"], [26, "26.10", "סמים והתמכרויות", "https://drive.google.com/drive/folders/14yar7heblTIPFBXhbx97o7VA2k5gcssx"], [27, "26.10", "הפרעות אכילה", "https://drive.google.com/drive/folders/1XkEoZgiWeGe0vNVkxqpi4IiP7FuJvztj"]];
@@ -105,13 +115,23 @@ const examRules=`\nבמצב בחינה: שאל שאלה אחת בכל פעם. א
 const learnRules=`\nבמצב למידה: בנה הסבר אינטגרטיבי ממוקד לבחינת שלב ב׳, אחריו retrieval practice. ידע שמוחזר מיד לאחר ההסבר ייחשב לאחר לימוד ולא ידע עצמאי. בסוף צור וריאציה חדשה לבדיקת ידע עצמאי.`;
 return header+common+(mode==="exam"?examRules:learnRules)+"\n\n"+feedbackContract(t,sid,mode);
 }
-async function launch(t,mode){
-  if(!PROJECT_URL){show("settings");alert("פעם אחת בלבד: הדביקי בהגדרות את קישור פרויקט ChatGPT ושמרי אותו.");return}
+let pendingLaunchPrompt="";
+function launch(t,mode){
+  if(!PROJECT_URL){show("settings");alert("צריך להגדיר פעם אחת את קישור פרויקט ChatGPT. הדביקי אותו בשדה ולחצי שמור.");return}
   const sid=startSession(t,mode),x=p(t,sid,mode);
-  const w=window.open(PROJECT_URL,"_blank");
-  try{await navigator.clipboard.writeText(x);toast("נפתח הפרויקט — הפרומפט הועתק. הדביקי בצ׳אט חדש")}catch(e){prompt("העתיקי את הפרומפט ואז הדביקי אותו בפרויקט שנפתח:",x)}
-  if(w)w.focus();renderHistory();
+  pendingLaunchPrompt=x;
+  document.getElementById("launchPrompt").value=x;
+  document.getElementById("launchTitle").textContent=(mode==="exam"?"בחינה":"למידה")+" — "+who()+" — "+t[2];
+  document.getElementById("launchNote").textContent="האפליקציה לא תעביר אותך אוטומטית למקום אחר. קודם מעתיקים, ואז פותחים במפורש את הפרויקט.";
+  document.getElementById("openProjectBtn").href=PROJECT_URL;
+  document.getElementById("launchModal").classList.add("show");
+  renderHistory();
 }
+async function copyLaunchPrompt(){
+  const x=pendingLaunchPrompt||document.getElementById("launchPrompt").value;
+  try{await navigator.clipboard.writeText(x);toast("הפרומפט הועתק")}catch(e){document.getElementById("launchPrompt").focus();document.getElementById("launchPrompt").select();toast("סמני והעתיקי את הטקסט")}
+}
+function closeLaunchModal(){document.getElementById("launchModal").classList.remove("show")}
 function exam(t){return launch(t,"exam")}
 function learn(t){return launch(t,"learn")}
 function toast(x){let e=document.getElementById("toast");e.textContent=x;e.style.display="block";setTimeout(()=>e.style.display="none",2000)}
