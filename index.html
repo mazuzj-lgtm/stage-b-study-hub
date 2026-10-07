@@ -13,29 +13,165 @@ main{max-width:900px;margin:auto;padding:12px} select,button,a{font:inherit} sel
 .primary{background:#1f4e78;color:white} .secondary{background:white;color:#1f4e78;border:1px solid #bfd0e2}
 .status{font-size:12px;color:#667085;margin-top:8px} .tabs{display:flex;gap:8px;margin:10px 0} .tabs button{flex:1}
 #review{display:none} .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#111827;color:white;padding:9px 12px;border-radius:9px;display:none}
-@media(max-width:600px){.grid{grid-template-columns:1fr}.actions>*{flex:1;min-width:44%}}
+.profiles{display:flex;gap:6px;flex-wrap:wrap}.profiles button{background:#fff;color:#1f4e78;border:1px solid #bfd0e2}.profiles button.active{background:#1f4e78;color:#fff}
+.panel{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:13px;margin-bottom:10px}
+textarea,input[type=text]{width:100%;font:inherit;border:1px solid #d8dee8;border-radius:10px;padding:10px;box-sizing:border-box}
+textarea{min-height:160px;line-height:1.45}.session{border-right:4px solid #1f4e78;padding-right:10px;margin:10px 0}.ok{color:#166534}.warn{color:#9a6700}.bad{color:#991b1b}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.actions>*{flex:1;min-width:44%}.profiles{width:100%}.profiles button{flex:1}}
 </style></head>
 <body>
 <header><h1>Stage B Study Hub</h1><div style="font-size:12px;opacity:.9">לוח ימים · Drive משותף · בחינה עם ChatGPT</div></header>
 <main>
 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-<select id="student"><option value="janet">ז׳אנט</option><option value="elisheva">אלישבע</option></select>
+<div class="profiles"><button id="janetBtn" type="button">ז׳אנט</button><button id="elishevaBtn" type="button">אלישבע</button></div>
 <a class="secondary" target="_blank" href="https://drive.google.com/drive/folders/1PWBc3KIHwAelgAzqpQG7W1eQ3SPHcAoT">Drive ראשי</a>
 </div>
-<div class="tabs"><button class="primary" onclick="show('days')">לוח ימים</button><button class="secondary" onclick="show('review')">מה לחזור</button></div>
+<div class="tabs"><button class="primary" onclick="show('days')">לוח ימים</button><button class="secondary" onclick="show('review')">מה לחזור</button><button class="secondary" onclick="show('feedback')">משוב מ‑GPT</button><button class="secondary" onclick="show('settings')">הגדרות/גיבוי</button></div>
 <div id="days" class="grid"></div><div id="review" class="grid"></div>
+<section id="feedback" style="display:none">
+  <div class="panel">
+    <b>📥 קליטת משוב מ‑ChatGPT</b>
+    <div class="status" style="margin:6px 0 9px">בסיום בחינה כתבי ל‑GPT „סיימנו”. הוא יתבקש להחזיר בלוק JSON. העתיקי את הבלוק לכאן והאפליקציה תעדכן את הנבחנת, הנושא והיסטוריית הסשן.</div>
+    <textarea id="feedbackInput" placeholder="הדביקי כאן STAGEB_FEEDBACK_JSON..."></textarea>
+    <div class="actions" style="margin-top:8px"><button class="primary" onclick="importFeedback()">קליטת משוב</button><button class="secondary" onclick="document.getElementById('feedbackInput').value=''">נקה</button></div>
+  </div>
+  <div class="panel"><b>היסטוריית סשנים — <span id="historyStudent"></span></b><div id="sessionHistory"></div></div>
+</section>
+<section id="settings" style="display:none">
+  <div class="panel">
+    <b>🔐 קישור לפרויקט ChatGPT</b>
+    <div class="status" style="margin:6px 0 9px">הקישור נשמר רק בדפדפן של המכשיר הזה ולא בתוך קוד האתר הציבורי.</div>
+    <input id="projectUrlInput" type="text" placeholder="https://chatgpt.com/.../project">
+    <div class="actions" style="margin-top:8px"><button class="primary" onclick="saveProjectUrl()">שמור קישור</button></div>
+  </div>
+  <div class="panel">
+    <b>💾 גיבוי לפני API</b>
+    <div class="status" style="margin:6px 0 9px">הגיבוי כולל סטטוסים, סשנים ומשובים של שתי הנבחנות במכשיר הזה.</div>
+    <div class="actions"><button class="primary" onclick="exportBackup()">ייצוא גיבוי</button><button class="secondary" onclick="document.getElementById('backupFile').click()">ייבוא גיבוי</button></div>
+    <input id="backupFile" type="file" accept=".json,application/json" style="display:none">
+  </div>
+  <div class="panel">
+    <b>מה כבר מוכן ל‑API בעתיד</b>
+    <div class="status">לכל בחינה יש session_id יציב; המשוב בפורמט versioned; הפרדה לפי student/topic; והיסטוריית הסשנים נשמרת ללא תלות בצ׳אט.</div>
+  </div>
+</section>
 </main><div id="toast" class="toast"></div>
 <script>
-const PROJECT_URL="https://chatgpt.com/g/g-p-6abe7fe417fc8191ba0904d20e09ac62/project";
+let PROJECT_URL=localStorage.getItem("stageb_project_url")||"";
 const T=[[1, "03.10", "סומטיזציה, מחלה כרונית ו-Liaison", "https://drive.google.com/drive/folders/1o2X4bP0jUdi1rhC_2_jDE0OjhMK6Wyf0"], [2, "04.10", "אובדנות", "https://drive.google.com/drive/folders/1dJ-QKN9QVy7m0d9YcUcWsolbMOKoCaMu"], [3, "05.10", "טראומה, ASD ו-PTSD", "https://drive.google.com/drive/folders/1K2IlqbrtajiHuJ4SD9MzI5wuxRgnnSP2"], [4, "06.10", "פסיכוזה וסכיזופרניה מוקדמת", "https://drive.google.com/drive/folders/1km1ai61Sui7H0G5u_mdEM7GWWZ0LMQQN"], [5, "07.10", "אנטיפסיכוטיים, EPS, NMS ותופעות מטבוליות", "https://drive.google.com/drive/folders/1LeiZ-1Jktu9UdVZABBYMUgjD9XESw78l"], [6, "08.10", "דיכאון, antidepressants ו-ECT", "https://drive.google.com/drive/folders/1tyGenyCJv6SvzWegDvkzM4nWR4MNaKT5"], [7, "09.10", "Bipolar ומייצבי מצב רוח", "https://drive.google.com/drive/folders/1ZXefWnLumGmscHv8Qq9Mx172JiDFr3Jf"], [8, "10.10", "חרדה ו-OCD", "https://drive.google.com/drive/folders/1m1IoaUs2a43w-nMFV3CA3ZdcD-fal2nI"], [9, "11.10", "ADHD", "https://drive.google.com/drive/folders/1BfNN7sO6fplogULMKSC_9XkLjpP4IaHP"], [10, "12.10", "ODD, Conduct, אלימות ותוקפנות", "https://drive.google.com/drive/folders/1vEJIx_ItnfJNup4WqgsBvwe0sDKcqdoe"], [11, "13.10", "טיקים ו-Tourette", "https://drive.google.com/drive/folders/15DOcYCewirEDlTCtXScUra9Vp6OiNv1m"], [12, "14.10", "ASD ו-Intellectual Disability", "https://drive.google.com/drive/folders/1VeL12toKngwE0axe8vTcqpNLZ0g1exPF"], [13, "15.10", "התפתחות נורמטיבית וגיל הרך", "https://drive.google.com/drive/folders/1AbAvFBw72CNvfXtJxtCbjs1Sslf_Lzk4"], [14, "16.10", "גנטיקה ונוירוביולוגיה התפתחותית", "https://drive.google.com/drive/folders/18elUoSQVjspTnEeIcBXtzefaE7ONJcfA"], [15, "17.10", "בדיקה נוירולוגית, localization והדמיה", "https://drive.google.com/drive/folders/11g9omoPMU5_gq3ymGkkbDm9NiCwSZ6by"], [16, "18.10", "Altered consciousness, delirium, syncope, TBI ו-CNS infection", "https://drive.google.com/drive/folders/1_EzV8l4JAuW01z5ERZhz6JXWXOKUdnIY"], [17, "19.10", "אפילפסיה, הפרעות תנועה ותסמונות נוירוגנטיות", "https://drive.google.com/drive/folders/1TpJ1IfyYHaQNczbtH35Os0J9J-8QgFP7"], [18, "20.10", "הפרעות שינה", "https://drive.google.com/drive/folders/1wWjmUXGmy5vf-olC8UqULcd7ruEOwSCU"], [19, "20.10", "דימוי גוף - Body Dysmorphic Disorder", "https://drive.google.com/drive/folders/1YgyqRzy-svJnHKGn3W85I4lj7nRxpFfU"], [20, "21.10", "שפה, לקויות למידה ודיסלקסיה", "https://drive.google.com/drive/folders/1V7jRnA1Go-GxgyL041sVpJWdcEhdM7Hk"], [21, "22.10", "התעללות, הזנחה ופגיעה מינית", "https://drive.google.com/drive/folders/18Y53qsMx6Xurb3fuSUHfzAHbLzScnv8s"], [22, "23.10", "פסיכיאטריה משפטית, אימוץ וגירושין", "https://drive.google.com/drive/folders/1Z0HufBM41s43txOAJII7yCBTCrbVQ8vD"], [23, "24.10", "פסיכופרמקולוגיה כללית, בנזודיאזפינים ומתודולוגיה", "https://drive.google.com/drive/folders/179st3jBqdqa6v8zHr36Ut6QDylvzS3ov"], [24, "25.10", "הריון, לידה, הנקה והמעבר להורות", "https://drive.google.com/drive/folders/1fnyZLiXHEMnFdy4OX8EvcPQyqsksnRKO"], [25, "25.10", "תיאוריות התפתחותיות מוקדמות", "https://drive.google.com/drive/folders/1rd6BMRXQdXXsHdBgw_D4dPpHOHPK2KDE"], [26, "26.10", "סמים והתמכרויות", "https://drive.google.com/drive/folders/14yar7heblTIPFBXhbx97o7VA2k5gcssx"], [27, "26.10", "הפרעות אכילה", "https://drive.google.com/drive/folders/1XkEoZgiWeGe0vNVkxqpi4IiP7FuJvztj"]];
-let student=localStorage.getItem("stageb_student")||"janet"; document.getElementById("student").value=student;
-function key(id){return "stageb_"+student+"_"+id} function st(id){return localStorage.getItem(key(id))||"לא התחיל"}
-function setS(id,s){localStorage.setItem(key(id),s);render()}
-function p(t){const who=student==="janet"?"ז׳אנט":"אלישבע";return who+" | "+t[2]+" | מצב בחינה\n\nהשתמש בהוראות הפרויקט, בסילבוס וב-Master Index כמקור השאלות, ובקבצי Lewis/Dulcan/Kaplan שבתיקיית Drive הזו כמקור הידע:\n"+t[3]+"\n\nשאל שאלה אחת בכל פעם. אל תיתן רמז או תשובת מודל לפני הניסיון. הפרד בין ידע עצמאי, אחרי רמז ואחרי לימוד. ידע שהוחזר מיד אחרי לימוד אינו נחשב ידע עצמאי. כסה את כל משפחות שאלות הסילבוס בנושא וגם וריאציה חדשה אחת. התחל בשאלה הראשונה בלבד."}
-async function exam(t){const x=p(t);const w=window.open(PROJECT_URL,"_blank");try{await navigator.clipboard.writeText(x);toast("נפתח הפרויקט שלנו — הדביקי את הפרומפט בצ׳אט חדש")}catch(e){prompt("העתיקי את הפרומפט ואז הדביקי אותו בפרויקט שנפתח:",x)}if(w)w.focus()}
-function toast(x){let e=document.getElementById("toast");e.textContent=x;e.style.display="block";setTimeout(()=>e.style.display="none",1800)}
-function card(t){return `<div class="card"><div class="date">${t[1]}</div><div class="topic">${String(t[0]).padStart(2,"0")} · ${t[2]}</div><div class="actions"><a class="secondary" target="_blank" href="${t[3]}">📁 חומרים</a><button class="primary" onclick="exam(T[${t[0]-1}])">🧠 בחינה בפרויקט</button></div><div class="actions" style="margin-top:7px"><button class="secondary" onclick="setS(${t[0]},'עצמאי')">עצמאי</button><button class="secondary" onclick="setS(${t[0]},'רמז')">רמז</button><button class="secondary" onclick="setS(${t[0]},'אחרי לימוד')">אחרי לימוד</button><button class="secondary" onclick="setS(${t[0]},'לחזרה')">לחזרה</button></div><div class="status">סטטוס: ${st(t[0])}</div></div>`}
-function render(){document.getElementById("days").innerHTML=T.map(card).join("");let r=T.filter(t=>["רמז","אחרי לימוד","לחזרה"].includes(st(t[0])));document.getElementById("review").innerHTML=r.length?r.map(card).join(""):'<div class="card">אין כרגע נושאים לחזרה.</div>'}
-function show(x){document.getElementById("days").style.display=x==="days"?"grid":"none";document.getElementById("review").style.display=x==="review"?"grid":"none"}
-document.getElementById("student").onchange=e=>{student=e.target.value;localStorage.setItem("stageb_student",student);render()};render();
+let student=localStorage.getItem("stageb_student")||"janet";
+function key(id){return "stageb_"+student+"_"+id}
+function st(id){return localStorage.getItem(key(id))||"לא התחיל"}
+function setS(id,s){localStorage.setItem(key(id),s);localStorage.setItem(key(id)+"_updated",new Date().toISOString());render()}
+function sessionKey(s=student){return "stageb_"+s+"_sessions"}
+function getSessions(s=student){try{return JSON.parse(localStorage.getItem(sessionKey(s))||"[]")}catch(e){return []}}
+function saveSessions(a,s=student){localStorage.setItem(sessionKey(s),JSON.stringify(a))}
+function uid(){return (crypto&&crypto.randomUUID)?crypto.randomUUID():"s-"+Date.now()+"-"+Math.random().toString(36).slice(2)}
+function setStudent(s){student=s;localStorage.setItem("stageb_student",s);document.getElementById("janetBtn").classList.toggle("active",s==="janet");document.getElementById("elishevaBtn").classList.toggle("active",s==="elisheva");render()}
+function who(){return student==="janet"?"ז׳אנט":"אלישבע"}
+function startSession(t,mode){
+  const sid=uid(), rec={schema_version:1,session_id:sid,student,topic_id:t[0],topic_name:t[2],mode,started_at:new Date().toISOString(),state:"pending"};
+  const a=getSessions();a.unshift(rec);saveSessions(a.slice(0,100));return sid;
+}
+function feedbackContract(t,sid,mode){
+return `בסיום הסשן, ורק כאשר אכתוב "סיימנו", החזר גם בלוק אחד שמתחיל בשורה STAGEB_FEEDBACK_JSON ואחריה JSON תקין בלבד במבנה:
+{
+  "schema_version":1,
+  "session_id":"${sid}",
+  "student":"${student}",
+  "topic_id":${t[0]},
+  "topic_name":"${t[2].replace(/"/g,'')}",
+  "mode":"${mode}",
+  "overall":"green|orange|red",
+  "covered_qids":[],
+  "independent_qids":[],
+  "hint_qids":[],
+  "learned_qids":[],
+  "review_qids":[],
+  "strengths":[],
+  "gaps":[],
+  "excess_or_imprecision":[],
+  "oral_organization":"קצר",
+  "source_access":{"drive_access":true,"files_used":[],"missing_or_inaccessible":[]},
+  "novel_variant_done":false,
+  "recommended_next":"קצר"
+}
+אל תמציא QID. השתמש ב-QID רק אם הוא מופיע ב-Master Index/סילבוס של הפרויקט. אם אינך יודע QID, השאר מערך ריק ותאר את הפער בטקסט.`;
+}
+function p(t,sid,mode="exam"){
+const header=who()+" | "+t[2]+" | "+(mode==="exam"?"מצב בחינה":"מצב למידה");
+const common=`\n\nהשתמש בהוראות הפרויקט, בסילבוס וב-Master Index כמקור השאלות. השתמש בקבצי Lewis/Dulcan/Kaplan שבתיקיית Drive הזו כמקור הידע:\n${t[3]}\n\nאם אין לך גישה בפועל לתיקייה או לקובץ — אמור זאת במפורש ואל תעמיד פנים שקראת אותו. אל תערבב בין ${who()} לבין הנבחנת השנייה.`;
+const examRules=`\nבמצב בחינה: שאל שאלה אחת בכל פעם. אל תיתן רמז, מבנה תשובה או תשובת מודל לפני הניסיון. הפרד בין ידע עצמאי, אחרי רמז ואחרי לימוד. ידע שהוחזר מיד אחרי לימוד אינו נחשב ידע עצמאי. כסה את כל משפחות שאלות הסילבוס בנושא וגם לפחות וריאציה חדשה אחת. משוב ביניים קצר בלבד. התחל בשאלה הראשונה בלבד.`;
+const learnRules=`\nבמצב למידה: בנה הסבר אינטגרטיבי ממוקד לבחינת שלב ב׳, אחריו retrieval practice. ידע שמוחזר מיד לאחר ההסבר ייחשב לאחר לימוד ולא ידע עצמאי. בסוף צור וריאציה חדשה לבדיקת ידע עצמאי.`;
+return header+common+(mode==="exam"?examRules:learnRules)+"\n\n"+feedbackContract(t,sid,mode);
+}
+async function launch(t,mode){
+  if(!PROJECT_URL){show("settings");alert("פעם אחת בלבד: הדביקי בהגדרות את קישור פרויקט ChatGPT ושמרי אותו.");return}
+  const sid=startSession(t,mode),x=p(t,sid,mode);
+  const w=window.open(PROJECT_URL,"_blank");
+  try{await navigator.clipboard.writeText(x);toast("נפתח הפרויקט — הפרומפט הועתק. הדביקי בצ׳אט חדש")}catch(e){prompt("העתיקי את הפרומפט ואז הדביקי אותו בפרויקט שנפתח:",x)}
+  if(w)w.focus();renderHistory();
+}
+function exam(t){return launch(t,"exam")}
+function learn(t){return launch(t,"learn")}
+function toast(x){let e=document.getElementById("toast");e.textContent=x;e.style.display="block";setTimeout(()=>e.style.display="none",2000)}
+function statusFromFeedback(f){
+  if(f.overall==="red"||(f.review_qids||[]).length)return "לחזרה";
+  if((f.learned_qids||[]).length)return "אחרי לימוד";
+  if(f.overall==="orange"||(f.hint_qids||[]).length)return "רמז";
+  if(f.overall==="green")return "עצמאי";
+  return "לחזרה";
+}
+function card(t){
+ const today=new Date(),md=String(today.getDate()).padStart(2,"0")+"."+String(today.getMonth()+1).padStart(2,"0"),isToday=t[1]===md;
+ return `<div class="card" style="${isToday?"border:2px solid #1f4e78":""}"><div class="date">${t[1]}${isToday?" · היום":""}</div><div class="topic">${String(t[0]).padStart(2,"0")} · ${t[2]}</div><div class="actions"><a class="secondary" target="_blank" href="${t[3]}">📁 חומרים</a><button class="primary" onclick="exam(T[${t[0]-1}])">🧠 בחינה — ${who()}</button><button class="secondary" onclick="learn(T[${t[0]-1}])">📘 למידה — ${who()}</button></div><div class="actions" style="margin-top:7px"><button class="secondary" onclick="setS(${t[0]},'עצמאי')">עצמאי</button><button class="secondary" onclick="setS(${t[0]},'רמז')">רמז</button><button class="secondary" onclick="setS(${t[0]},'אחרי לימוד')">אחרי לימוד</button><button class="secondary" onclick="setS(${t[0]},'לחזרה')">לחזרה</button></div><div class="status">סטטוס: ${st(t[0])}</div></div>`}
+function render(){
+ document.getElementById("janetBtn").classList.toggle("active",student==="janet");
+ document.getElementById("elishevaBtn").classList.toggle("active",student==="elisheva");
+ document.getElementById("days").innerHTML=T.map(card).join("");
+ let r=T.filter(t=>["רמז","אחרי לימוד","לחזרה"].includes(st(t[0])));
+ document.getElementById("review").innerHTML=r.length?r.map(card).join(""):'<div class="card">אין כרגע נושאים שסומנו לחזרה.</div>';
+ renderHistory();
+}
+function renderHistory(){
+ const el=document.getElementById("sessionHistory");if(!el)return;
+ document.getElementById("historyStudent").textContent=who();
+ const a=getSessions().slice(0,20);
+ el.innerHTML=a.length?a.map(s=>{
+   const f=s.feedback||{},cls=f.overall==="green"?"ok":f.overall==="red"?"bad":"warn";
+   const gaps=(f.gaps||[]).slice(0,3).join(" · ");
+   const src=f.source_access||{};
+   return `<div class="session"><b>${s.topic_id}. ${s.topic_name}</b> · ${s.mode==="learn"?"למידה":"בחינה"}<br><span class="${cls}">${s.state==="done"?(f.overall||"הושלם"):"ממתין למשוב"}</span> <span class="status">${new Date(s.started_at).toLocaleString("he-IL")}</span>${gaps?`<div class="status"><b>פערים:</b> ${gaps}</div>`:""}${s.state==="done"?`<div class="status"><b>מקורות:</b> ${src.drive_access===false?"⚠️ Drive לא נגיש":"✓"} ${(src.files_used||[]).slice(0,3).join(", ")}</div>`:""}</div>`
+ }).join(""):'<div class="status">עדיין אין סשנים.</div>';
+}
+function extractJson(txt){const a=txt.indexOf("{"),b=txt.lastIndexOf("}");if(a<0||b<=a)throw new Error("לא נמצא JSON");return JSON.parse(txt.slice(a,b+1))}
+function importFeedback(){
+ try{
+   const f=extractJson(document.getElementById("feedbackInput").value.trim());
+   if(f.schema_version!==1)throw new Error("גרסת משוב לא נתמכת");
+   if(f.student!==student)throw new Error("המשוב שייך ל-"+(f.student==="janet"?"ז׳אנט":"אלישבע")+". עברי קודם לפרופיל הנכון.");
+   const t=T.find(x=>x[0]===Number(f.topic_id));if(!t)throw new Error("topic_id לא תקין");
+   const a=getSessions();let i=a.findIndex(x=>x.session_id===f.session_id);
+   if(i<0){a.unshift({schema_version:1,session_id:f.session_id||uid(),student,topic_id:t[0],topic_name:t[2],mode:f.mode||"exam",started_at:new Date().toISOString(),state:"done",completed_at:new Date().toISOString(),feedback:f})}
+   else{a[i]={...a[i],state:"done",completed_at:new Date().toISOString(),feedback:f}}
+   saveSessions(a.slice(0,100));setS(t[0],statusFromFeedback(f));
+   document.getElementById("feedbackInput").value="";toast("המשוב נקלט ונשמר");render();show("feedback");
+ }catch(e){alert("לא הצלחתי לקלוט את המשוב: "+e.message)}
+}
+function saveProjectUrl(){const v=document.getElementById("projectUrlInput").value.trim();if(!/^https:\/\/chatgpt\.com\//.test(v)){alert("הדביקי קישור ChatGPT תקין");return}PROJECT_URL=v;localStorage.setItem("stageb_project_url",v);toast("קישור הפרויקט נשמר במכשיר הזה")}
+function exportBackup(){
+ const data={schema_version:1,exported_at:new Date().toISOString(),items:{}};
+ for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith("stageb_")&&k!=="stageb_project_url")data.items[k]=localStorage.getItem(k)}
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="stageb-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)
+}
+function importBackupFile(file){const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);Object.entries(d.items||{}).forEach(([k,v])=>localStorage.setItem(k,v));toast("הגיבוי נטען");setStudent(localStorage.getItem("stageb_student")||student)}catch(e){alert("קובץ גיבוי לא תקין")}};r.readAsText(file)}
+function show(x){
+ ["days","review","feedback","settings"].forEach(id=>document.getElementById(id).style.display=id===x?(id==="days"||id==="review"?"grid":"block"):"none");
+ if(x==="feedback")renderHistory();
+ if(x==="settings")document.getElementById("projectUrlInput").value=PROJECT_URL;
+}
+document.getElementById("janetBtn").onclick=()=>setStudent("janet");
+document.getElementById("elishevaBtn").onclick=()=>setStudent("elisheva");
+document.getElementById("backupFile").onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)importBackupFile(f);e.target.value=""};
+render();
 </script></body></html>
