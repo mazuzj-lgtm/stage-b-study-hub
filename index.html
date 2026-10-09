@@ -21,7 +21,7 @@ textarea{min-height:160px;line-height:1.45}.session{border-right:4px solid #1f4e
 @media(max-width:600px){.grid{grid-template-columns:1fr}.actions>*{flex:1;min-width:44%}.profiles{width:100%}.profiles button{flex:1}.modalBack{padding:10px}.modal{max-height:92vh}}
 </style></head>
 <body>
-<header><h1>Stage B Study Hub</h1><div style="font-size:12px;opacity:.9">לוח ימים · Drive משותף · בחינה עם ChatGPT · גרסה 2.5 — NotebookLM + 253 שאלות</div></header>
+<header><h1>Stage B Study Hub</h1><div style="font-size:12px;opacity:.9">לוח ימים · Drive משותף · בחינה עם ChatGPT · גרסה 2.5.1 — תיקון מובייל</div></header>
 <main>
 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
 <div class="profiles"><button id="janetBtn" type="button">ז׳אנט</button><button id="elishevaBtn" type="button">אלישבע</button></div>
@@ -133,7 +133,9 @@ return "NotebookLM | "+t[2]+" | הכנה ממוקדת לשלב ב׳ פסיכיא
 "8. בסוף תן 10–15 נקודות שאסור לפספס, 5 שאלות follow-up קשות, תשובת שתי דקות ו-2–3 micro-cases/וריאציות חדשות שאינן העתק של נוסח הסילבוס.\\n"+
 "9. סיים ב-AUDIT: עבור כל QID ברשימה כתוב Covered / Partial / Missing, ואז רשימת פערי כיסוי שדורשים מקור נוסף.\\n\\n"+
 "אם אני מבקשת Audio Overview/פודקאסט: בנה אותו סביב שאלות הסילבוס, דרישות הידע ומפת הכיסוי הזו, לא סביב סדר הפרקים בספר.";
-}\nfunction notebook(t){pendingLaunchPrompt=notebookPrompt(t);document.getElementById("launchPrompt").value=pendingLaunchPrompt;document.getElementById("launchTitle").textContent="NotebookLM — "+t[2];document.getElementById("launchNote").textContent="הוסיפי למחברת NotebookLM את קבצי הנושא מה-Drive, ואז העתיקי והדביקי את הפרומפט.";const b=document.getElementById("openProjectBtn");b.href="https://notebooklm.google.com/";b.textContent="פתחי NotebookLM";document.getElementById("launchModal").classList.add("show");}\nfunction p(t,sid,mode="exam"){
+}
+function notebook(t){pendingLaunchPrompt=notebookPrompt(t);document.getElementById("launchPrompt").value=pendingLaunchPrompt;document.getElementById("launchTitle").textContent="NotebookLM — "+t[2];document.getElementById("launchNote").textContent="הוסיפי למחברת NotebookLM את קבצי הנושא מה-Drive, ואז העתיקי והדביקי את הפרומפט.";const b=document.getElementById("openProjectBtn");b.href="https://notebooklm.google.com/";b.textContent="פתחי NotebookLM";document.getElementById("launchModal").classList.add("show");}
+function p(t,sid,mode="exam"){
 const header=who()+" | "+t[2]+" | "+(mode==="exam"?"מצב בחינה":"מצב למידה");
 const common=`\n\nהשתמש בהוראות הפרויקט, בסילבוס וב-Master Index כמקור השאלות. השתמש בקבצי Lewis/Dulcan/Kaplan שבתיקיית Drive הזו כמקור הידע:\n${t[3]}\n\nאם אין לך גישה בפועל לתיקייה או לקובץ — אמור זאת במפורש ואל תעמיד פנים שקראת אותו. אל תערבב בין ${who()} לבין הנבחנת השנייה.`;
 const examRules=`\nבמצב בחינה: שאל שאלה אחת בכל פעם. אל תיתן רמז, מבנה תשובה או תשובת מודל לפני הניסיון. הפרד בין ידע עצמאי, אחרי רמז ואחרי לימוד. ידע שהוחזר מיד אחרי לימוד אינו נחשב ידע עצמאי. כסה את כל משפחות שאלות הסילבוס בנושא וגם לפחות וריאציה חדשה אחת. משוב ביניים קצר בלבד. התחל בשאלה הראשונה בלבד.`;
