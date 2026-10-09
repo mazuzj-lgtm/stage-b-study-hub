@@ -21,7 +21,7 @@ textarea{min-height:160px;line-height:1.45}.session{border-right:4px solid #1f4e
 @media(max-width:600px){.grid{grid-template-columns:1fr}.actions>*{flex:1;min-width:44%}.profiles{width:100%}.profiles button{flex:1}.modalBack{padding:10px}.modal{max-height:92vh}}
 </style></head>
 <body>
-<header><h1>Stage B Study Hub</h1><div style="font-size:12px;opacity:.9">לוח ימים · Drive משותף · בחינה עם ChatGPT · גרסה 2.2 — 07.10</div></header>
+<header><h1>Stage B Study Hub</h1><div style="font-size:12px;opacity:.9">לוח ימים · Drive משותף · בחינה עם ChatGPT · גרסה 2.3 — NotebookLM</div></header>
 <main>
 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
 <div class="profiles"><button id="janetBtn" type="button">ז׳אנט</button><button id="elishevaBtn" type="button">אלישבע</button></div>
@@ -108,7 +108,7 @@ return `בסיום הסשן, ורק כאשר אכתוב "סיימנו", החזר
 }
 אל תמציא QID. השתמש ב-QID רק אם הוא מופיע ב-Master Index/סילבוס של הפרויקט. אם אינך יודע QID, השאר מערך ריק ותאר את הפער בטקסט.`;
 }
-function p(t,sid,mode="exam"){
+function notebookPrompt(t){return "NotebookLM | "+t[2]+" | הכנה לשלב ב׳ פסיכיאטריה של הילד והמתבגר\\n\\nהשתמש רק במקורות שהעליתי למחברת עבור הנושא הזה. אל תוסיף ידע חיצוני שאינו מופיע במקורות, ואם חסר משהו מהותי אמור זאת במפורש.\\n\\nשלב בין המקורות לנרטיב אחד ולא ספר-ספר. הדגש clinical reasoning, אבחנה מבדלת, בירור, טיפול, monitoring ופרוגנוזה לפי הרלוונטיות. ציין הבדלים בין המקורות. הדגש high-yield וטעויות שכיחות. בסוף תן 8–15 נקודות שאסור לפספס, 3–5 follow-ups קשים ותשובת שתי דקות. אם מתאים הוסף micro-case או השוואה קצרה.\\n\\nתיקיית Drive לבחירת המקורות: "+t[3]+"\\n\\nנושא: "+t[2]+".";}\nfunction notebook(t){pendingLaunchPrompt=notebookPrompt(t);document.getElementById("launchPrompt").value=pendingLaunchPrompt;document.getElementById("launchTitle").textContent="NotebookLM — "+t[2];document.getElementById("launchNote").textContent="הוסיפי למחברת NotebookLM את קבצי הנושא מה-Drive, ואז העתיקי והדביקי את הפרומפט.";const b=document.getElementById("openProjectBtn");b.href="https://notebooklm.google.com/";b.textContent="פתחי NotebookLM";document.getElementById("launchModal").classList.add("show");}\nfunction p(t,sid,mode="exam"){
 const header=who()+" | "+t[2]+" | "+(mode==="exam"?"מצב בחינה":"מצב למידה");
 const common=`\n\nהשתמש בהוראות הפרויקט, בסילבוס וב-Master Index כמקור השאלות. השתמש בקבצי Lewis/Dulcan/Kaplan שבתיקיית Drive הזו כמקור הידע:\n${t[3]}\n\nאם אין לך גישה בפועל לתיקייה או לקובץ — אמור זאת במפורש ואל תעמיד פנים שקראת אותו. אל תערבב בין ${who()} לבין הנבחנת השנייה.`;
 const examRules=`\nבמצב בחינה: שאל שאלה אחת בכל פעם. אל תיתן רמז, מבנה תשובה או תשובת מודל לפני הניסיון. הפרד בין ידע עצמאי, אחרי רמז ואחרי לימוד. ידע שהוחזר מיד אחרי לימוד אינו נחשב ידע עצמאי. כסה את כל משפחות שאלות הסילבוס בנושא וגם לפחות וריאציה חדשה אחת. משוב ביניים קצר בלבד. התחל בשאלה הראשונה בלבד.`;
@@ -123,7 +123,7 @@ function launch(t,mode){
   document.getElementById("launchPrompt").value=x;
   document.getElementById("launchTitle").textContent=(mode==="exam"?"בחינה":"למידה")+" — "+who()+" — "+t[2];
   document.getElementById("launchNote").textContent="האפליקציה לא תעביר אותך אוטומטית למקום אחר. קודם מעתיקים, ואז פותחים במפורש את הפרויקט.";
-  document.getElementById("openProjectBtn").href=PROJECT_URL;
+  const b=document.getElementById("openProjectBtn");b.href=PROJECT_URL;b.textContent="פתחי את פרויקט אלישבע וז׳אנט";
   document.getElementById("launchModal").classList.add("show");
   renderHistory();
 }
@@ -144,7 +144,7 @@ function statusFromFeedback(f){
 }
 function card(t){
  const today=new Date(),md=String(today.getDate()).padStart(2,"0")+"."+String(today.getMonth()+1).padStart(2,"0"),isToday=t[1]===md;
- return `<div class="card" style="${isToday?"border:2px solid #1f4e78":""}"><div class="date">${t[1]}${isToday?" · היום":""}</div><div class="topic">${String(t[0]).padStart(2,"0")} · ${t[2]}</div><div class="actions"><a class="secondary" target="_blank" href="${t[3]}">📁 חומרים</a><button class="primary" onclick="exam(T[${t[0]-1}])">🧠 בחינה — ${who()}</button><button class="secondary" onclick="learn(T[${t[0]-1}])">📘 למידה — ${who()}</button></div><div class="actions" style="margin-top:7px"><button class="secondary" onclick="setS(${t[0]},'עצמאי')">עצמאי</button><button class="secondary" onclick="setS(${t[0]},'רמז')">רמז</button><button class="secondary" onclick="setS(${t[0]},'אחרי לימוד')">אחרי לימוד</button><button class="secondary" onclick="setS(${t[0]},'לחזרה')">לחזרה</button></div><div class="status">סטטוס: ${st(t[0])}</div></div>`}
+ return `<div class="card" style="${isToday?"border:2px solid #1f4e78":""}"><div class="date">${t[1]}${isToday?" · היום":""}</div><div class="topic">${String(t[0]).padStart(2,"0")} · ${t[2]}</div><div class="actions"><a class="secondary" target="_blank" href="${t[3]}">📁 חומרים</a><button class="primary" onclick="exam(T[${t[0]-1}])">🧠 בחינה — ${who()}</button><button class="secondary" onclick="learn(T[${t[0]-1}])">📘 למידה — ${who()}</button><button class="secondary" onclick="notebook(T[${t[0]-1}])">🎧 NotebookLM</button></div><div class="actions" style="margin-top:7px"><button class="secondary" onclick="setS(${t[0]},'עצמאי')">עצמאי</button><button class="secondary" onclick="setS(${t[0]},'רמז')">רמז</button><button class="secondary" onclick="setS(${t[0]},'אחרי לימוד')">אחרי לימוד</button><button class="secondary" onclick="setS(${t[0]},'לחזרה')">לחזרה</button></div><div class="status">סטטוס: ${st(t[0])}</div></div>`}
 function render(){
  document.getElementById("janetBtn").classList.toggle("active",student==="janet");
  document.getElementById("elishevaBtn").classList.toggle("active",student==="elisheva");
