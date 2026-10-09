@@ -21,7 +21,7 @@ textarea{min-height:160px;line-height:1.45}.session{border-right:4px solid #1f4e
 @media(max-width:600px){.grid{grid-template-columns:1fr}.actions>*{flex:1;min-width:44%}.profiles{width:100%}.profiles button{flex:1}.modalBack{padding:10px}.modal{max-height:92vh}}
 </style></head>
 <body>
-<header><h1>Stage B Study Hub</h1><div style="font-size:12px;opacity:.9">לוח ימים · Drive משותף · בחינה עם ChatGPT · גרסה 2.4 — NotebookLM לפי סילבוס</div></header>
+<header><h1>Stage B Study Hub</h1><div style="font-size:12px;opacity:.9">לוח ימים · Drive משותף · בחינה עם ChatGPT · גרסה 2.5 — NotebookLM + 253 שאלות</div></header>
 <main>
 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
 <div class="profiles"><button id="janetBtn" type="button">ז׳אנט</button><button id="elishevaBtn" type="button">אלישבע</button></div>
@@ -66,6 +66,7 @@ textarea{min-height:160px;line-height:1.45}.session{border-right:4px solid #1f4e
     <div class="actions" style="margin-top:10px"><button class="secondary" onclick="closeLaunchModal()">סגור</button><button class="secondary" onclick="show('settings');closeLaunchModal()">שני קישור פרויקט</button></div>
   </div>
 </div>
+<script src="questions.js?v=25"></script>
 <script>
 let PROJECT_URL=localStorage.getItem("stageb_project_url")||"";
 const T=[[1, "03.10", "סומטיזציה, מחלה כרונית ו-Liaison", "https://drive.google.com/drive/folders/1o2X4bP0jUdi1rhC_2_jDE0OjhMK6Wyf0"], [2, "04.10", "אובדנות", "https://drive.google.com/drive/folders/1dJ-QKN9QVy7m0d9YcUcWsolbMOKoCaMu"], [3, "05.10", "טראומה, ASD ו-PTSD", "https://drive.google.com/drive/folders/1K2IlqbrtajiHuJ4SD9MzI5wuxRgnnSP2"], [4, "06.10", "פסיכוזה וסכיזופרניה מוקדמת", "https://drive.google.com/drive/folders/1km1ai61Sui7H0G5u_mdEM7GWWZ0LMQQN"], [5, "07.10", "אנטיפסיכוטיים, EPS, NMS ותופעות מטבוליות", "https://drive.google.com/drive/folders/1LeiZ-1Jktu9UdVZABBYMUgjD9XESw78l"], [6, "08.10", "דיכאון, antidepressants ו-ECT", "https://drive.google.com/drive/folders/1tyGenyCJv6SvzWegDvkzM4nWR4MNaKT5"], [7, "09.10", "Bipolar ומייצבי מצב רוח", "https://drive.google.com/drive/folders/1ZXefWnLumGmscHv8Qq9Mx172JiDFr3Jf"], [8, "10.10", "חרדה ו-OCD", "https://drive.google.com/drive/folders/1m1IoaUs2a43w-nMFV3CA3ZdcD-fal2nI"], [9, "11.10", "ADHD", "https://drive.google.com/drive/folders/1BfNN7sO6fplogULMKSC_9XkLjpP4IaHP"], [10, "12.10", "ODD, Conduct, אלימות ותוקפנות", "https://drive.google.com/drive/folders/1vEJIx_ItnfJNup4WqgsBvwe0sDKcqdoe"], [11, "13.10", "טיקים ו-Tourette", "https://drive.google.com/drive/folders/15DOcYCewirEDlTCtXScUra9Vp6OiNv1m"], [12, "14.10", "ASD ו-Intellectual Disability", "https://drive.google.com/drive/folders/1VeL12toKngwE0axe8vTcqpNLZ0g1exPF"], [13, "15.10", "התפתחות נורמטיבית וגיל הרך", "https://drive.google.com/drive/folders/1AbAvFBw72CNvfXtJxtCbjs1Sslf_Lzk4"], [14, "16.10", "גנטיקה ונוירוביולוגיה התפתחותית", "https://drive.google.com/drive/folders/18elUoSQVjspTnEeIcBXtzefaE7ONJcfA"], [15, "17.10", "בדיקה נוירולוגית, localization והדמיה", "https://drive.google.com/drive/folders/11g9omoPMU5_gq3ymGkkbDm9NiCwSZ6by"], [16, "18.10", "Altered consciousness, delirium, syncope, TBI ו-CNS infection", "https://drive.google.com/drive/folders/1_EzV8l4JAuW01z5ERZhz6JXWXOKUdnIY"], [17, "19.10", "אפילפסיה, הפרעות תנועה ותסמונות נוירוגנטיות", "https://drive.google.com/drive/folders/1TpJ1IfyYHaQNczbtH35Os0J9J-8QgFP7"], [18, "20.10", "הפרעות שינה", "https://drive.google.com/drive/folders/1wWjmUXGmy5vf-olC8UqULcd7ruEOwSCU"], [19, "20.10", "דימוי גוף - Body Dysmorphic Disorder", "https://drive.google.com/drive/folders/1YgyqRzy-svJnHKGn3W85I4lj7nRxpFfU"], [20, "21.10", "שפה, לקויות למידה ודיסלקסיה", "https://drive.google.com/drive/folders/1V7jRnA1Go-GxgyL041sVpJWdcEhdM7Hk"], [21, "22.10", "התעללות, הזנחה ופגיעה מינית", "https://drive.google.com/drive/folders/18Y53qsMx6Xurb3fuSUHfzAHbLzScnv8s"], [22, "23.10", "פסיכיאטריה משפטית, אימוץ וגירושין", "https://drive.google.com/drive/folders/1Z0HufBM41s43txOAJII7yCBTCrbVQ8vD"], [23, "24.10", "פסיכופרמקולוגיה כללית, בנזודיאזפינים ומתודולוגיה", "https://drive.google.com/drive/folders/179st3jBqdqa6v8zHr36Ut6QDylvzS3ov"], [24, "25.10", "הריון, לידה, הנקה והמעבר להורות", "https://drive.google.com/drive/folders/1fnyZLiXHEMnFdy4OX8EvcPQyqsksnRKO"], [25, "25.10", "תיאוריות התפתחותיות מוקדמות", "https://drive.google.com/drive/folders/1rd6BMRXQdXXsHdBgw_D4dPpHOHPK2KDE"], [26, "26.10", "סמים והתמכרויות", "https://drive.google.com/drive/folders/14yar7heblTIPFBXhbx97o7VA2k5gcssx"], [27, "26.10", "הפרעות אכילה", "https://drive.google.com/drive/folders/1XkEoZgiWeGe0vNVkxqpi4IiP7FuJvztj"]];
@@ -113,21 +114,25 @@ return `בסיום הסשן, ורק כאשר אכתוב "סיימנו", החזר
 function notebookPrompt(t){
 const req=NB_REQ[t[0]]||"";
 const cov=NB_COVERAGE[t[0]]||"";
+const qs=(window.NB_QUESTIONS&&window.NB_QUESTIONS[String(t[0])])||[];
+const exact=qs.length?qs.map(x=>x.id+" | עמ׳ "+x.page+" | "+x.q).join("\\n"):"לא נטענה רשימת שאלות מדויקת — עצור וציין שחסר מאגר השאלות.";
 return "NotebookLM | "+t[2]+" | הכנה ממוקדת לשלב ב׳ פסיכיאטריה של הילד והמתבגר\\n\\n"+
 "עבוד רק על בסיס המקורות שהועלו למחברת NotebookLM. אל תשלים ידע חסר מהזיכרון או מהאינטרנט. אם דרישת סילבוס אינה נתמכת במקורות, סמן אותה במפורש כחסר/דורש מקור נוסף.\\n\\n"+
 "דרישות הידע לפי הסילבוס לנושא הזה:\\n"+req+"\\n\\n"+
+"שאלות הסילבוס המדויקות ששייכות לנושא הזה — אלה יעדי הכיסוי המחייבים:\\n"+exact+"\\n\\n"+
 "הערכת הכיסוי הידועה ממיפוי המקורות שלנו:\\n"+cov+"\\n\\n"+
 "תיקיית Drive של הנושא, שממנה יש לבחור את המקורות למחברת:\\n"+t[3]+"\\n\\n"+
 "המשימה שלך:\\n"+
-"1. תחילה בנה מפת כיסוי: לכל רכיב בדרישות הסילבוס סמן מכוסה היטב / מכוסה חלקית / לא מכוסה, וציין על איזה מקור במחברת אתה נשען.\\n"+
-"2. לאחר מכן צור לימוד אינטגרטיבי שמכסה את כל מה שנתמך במקורות. אל תסכם ספר-ספר; חבר בין Lewis, Dulcan, Kaplan ושאר המקורות.\\n"+
-"3. התאם לבחינה בעל-פה: clinical reasoning, אבחנה מבדלת, בירור, טיפול/אלגוריתם, monitoring, מהלך ופרוגנוזה לפי הרלוונטיות.\\n"+
-"4. הדגש high-yield, נקודות שקל לפספס וטעויות אופייניות של נבחנים.\\n"+
-"5. אם המקורות חלוקים, הצג את ההבדל ואל תיישב אותו בלי בסיס.\\n"+
-"6. אל תבזבז זמן על חומר שאינו נדרש לנושא רק מפני שהוא מופיע בפרק.\\n"+
-"7. בסוף תן 10–15 נקודות שאסור לפספס, 5 שאלות follow-up קשות, תשובת שתי דקות ו-2–3 micro-cases/וריאציות חדשות.\\n"+
-"8. סיים ברשימת פערי כיסוי: מה הסילבוס דורש אך המקורות במחברת לא מאפשרים ללמוד בצורה מספקת.\\n\\n"+
-"אם אני מבקשת Audio Overview/פודקאסט: בנה אותו סביב דרישות הסילבוס ומפת הכיסוי הזו, לא סביב סדר הפרקים בספר.";
+"1. תחילה בנה מפת כיסוי לפי כל שאלה מדויקת ברשימה: מכוסה היטב / מכוסה חלקית / לא מכוסה, וציין על איזה מקור במחברת אתה נשען.\\n"+
+"2. קבץ שאלות חופפות לשאלות-אב לצורך הלמידה, אך אל תאבד אף דרישת משנה.\\n"+
+"3. צור לימוד אינטגרטיבי שמכסה את כל מה שנתמך במקורות. אל תסכם ספר-ספר; חבר בין Lewis, Dulcan, Kaplan ושאר המקורות.\\n"+
+"4. התאם לבחינה בעל-פה: clinical reasoning, אבחנה מבדלת, בירור, טיפול/אלגוריתם, monitoring, מהלך ופרוגנוזה לפי הרלוונטיות.\\n"+
+"5. הדגש high-yield, נקודות שקל לפספס וטעויות אופייניות של נבחנים.\\n"+
+"6. אם המקורות חלוקים, הצג את ההבדל ואל תיישב אותו בלי בסיס.\\n"+
+"7. אל תבזבז זמן על חומר שאינו נדרש לנושא רק מפני שהוא מופיע בפרק.\\n"+
+"8. בסוף תן 10–15 נקודות שאסור לפספס, 5 שאלות follow-up קשות, תשובת שתי דקות ו-2–3 micro-cases/וריאציות חדשות שאינן העתק של נוסח הסילבוס.\\n"+
+"9. סיים ב-AUDIT: עבור כל QID ברשימה כתוב Covered / Partial / Missing, ואז רשימת פערי כיסוי שדורשים מקור נוסף.\\n\\n"+
+"אם אני מבקשת Audio Overview/פודקאסט: בנה אותו סביב שאלות הסילבוס, דרישות הידע ומפת הכיסוי הזו, לא סביב סדר הפרקים בספר.";
 }\nfunction notebook(t){pendingLaunchPrompt=notebookPrompt(t);document.getElementById("launchPrompt").value=pendingLaunchPrompt;document.getElementById("launchTitle").textContent="NotebookLM — "+t[2];document.getElementById("launchNote").textContent="הוסיפי למחברת NotebookLM את קבצי הנושא מה-Drive, ואז העתיקי והדביקי את הפרומפט.";const b=document.getElementById("openProjectBtn");b.href="https://notebooklm.google.com/";b.textContent="פתחי NotebookLM";document.getElementById("launchModal").classList.add("show");}\nfunction p(t,sid,mode="exam"){
 const header=who()+" | "+t[2]+" | "+(mode==="exam"?"מצב בחינה":"מצב למידה");
 const common=`\n\nהשתמש בהוראות הפרויקט, בסילבוס וב-Master Index כמקור השאלות. השתמש בקבצי Lewis/Dulcan/Kaplan שבתיקיית Drive הזו כמקור הידע:\n${t[3]}\n\nאם אין לך גישה בפועל לתיקייה או לקובץ — אמור זאת במפורש ואל תעמיד פנים שקראת אותו. אל תערבב בין ${who()} לבין הנבחנת השנייה.`;
